@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from services.agents.orchestrator import run_replay
 from services.agents.replay import load_replay
 from services.agents.store import JsonStore
-from services.api.dashboard import render_dashboard
+from services.api.dashboard import approval_view, render_dashboard
 from services.notify.dispatcher import dispatch, kill_switch_on
 
 _DEFAULT_STORE = Path("data/local/decisions.json")
@@ -53,6 +53,9 @@ def create_app(store: JsonStore, outbox_path: Path | None = None, seed: bool = F
         if hold_warning():
             ensure_graviton()
         current, previous = _latest(store)
+        if current is not None and current.status in {"APPROVED", "REJECTED"}:
+            current.status = "PENDING_APPROVAL"
+            store.save_decision(current)
         return render_dashboard(current, previous, _outbox_rows(outbox))
 
     @app.post("/replay/{name}")
@@ -85,14 +88,16 @@ def create_app(store: JsonStore, outbox_path: Path | None = None, seed: bool = F
         decision.status = "APPROVED"
         store.save_decision(decision)
         rows = dispatch(decision, store.residents(), kill_switch_on(), outbox)
-        return {"status": decision.status, "sent": len(rows)}
+        payload = approval_view(decision, rows)
+        payload["sent"] = len(rows)
+        return payload
 
     @app.post("/decisions/{incident_id}/{cycle_ts}/reject")
     def reject(incident_id: str, cycle_ts: str) -> dict:
         decision = _require(store, incident_id, cycle_ts)
         decision.status = "REJECTED"
         store.save_decision(decision)
-        return {"status": decision.status}
+        return approval_view(decision, [])
 
     @app.post("/decisions/{incident_id}/{cycle_ts}/edit")
     def edit(incident_id: str, cycle_ts: str, body: EditBody) -> dict:

@@ -223,6 +223,16 @@ def _decision(decision: Decision, previous: Decision | None, sent: list[dict]) -
 """
 
 
+def approval_view(decision: Decision, sent: list[dict]) -> dict:
+    """Text the page swaps in after Approve, without replaying the cameras."""
+    return {
+        "status": decision.status,
+        "label": _STATUS.get(decision.status, decision.status),
+        "lead": _lead(decision),
+        "saved": _outbox(decision, sent),
+    }
+
+
 def _lead(decision: Decision) -> str:
     road = _road(decision.plan.route)
     place = _where(decision)
@@ -479,8 +489,19 @@ def _buttons(decision: Decision) -> str:
   async function act(action) {{
     const path = "/decisions/" + encodeURIComponent(decision.incident_id)
       + "/" + encodeURIComponent(decision.cycle_ts) + "/" + action;
-    await fetch(path, {{ method: "POST" }});
-    location.reload();
+    const response = await fetch(path, {{ method: "POST" }});
+    const body = await response.json();
+    const screen = document.querySelector(".screen");
+    if (screen) screen.classList.remove("finding");
+    const ready = document.querySelector(".when-ready");
+    const status = ready.querySelector(".status");
+    status.textContent = body.label;
+    status.classList.toggle("waiting", body.status !== "APPROVED");
+    ready.querySelector("h1").textContent = body.lead;
+    const actions = document.querySelector(".actions");
+    if (actions) actions.remove();
+    const after = document.querySelector(".after-check");
+    if (after && body.saved) after.insertAdjacentHTML("beforeend", body.saved);
   }}
   document.getElementById("approve").onclick = () => act("approve");
   document.getElementById("reject").onclick = () => act("reject");

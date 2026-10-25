@@ -80,7 +80,8 @@ def test_home_shows_the_route_change(monkeypatch, tmp_path: Path):
         assert "This draft sends people on Interstate 5" in page.text
         approved = client.post("/decisions/norte-replay/2026-10-16T19:10:00Z/approve")
         assert approved.json()["sent"] == 1
-        again = client.get("/")
-        assert "Approved" in again.text
-        assert "r-vulnerable" in again.text
-        assert "Run this check again" in again.text
+        assert "You approved the warning" in approved.json()["lead"]
+        assert "r-vulnerable" in approved.json()["saved"]
+        reset = client.get("/")
+        assert "You approved the warning" not in reset.text
+        assert "Approve this warning" in reset.text
