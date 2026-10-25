@@ -1,0 +1,52 @@
+%% MVP loop. LLMs propose, rules.py decides, a human approves.
+%% This is the perception → decision → action flow with the human gate.
+flowchart TD
+  trigger["Trigger<br/>FIRMS hotspot or replay"]
+  trigger --> see
+
+  subgraph see ["See · OpenCV 5"]
+    direction LR
+    smoke["Smoke check<br/>nearby cameras"]
+    track["GOES-18 track<br/>front · bearing · speed"]
+    routes["Route status<br/>clear · slow · blocked · unknown"]
+  end
+
+  see --> decide
+
+  subgraph decide ["Decide"]
+    direction TB
+    fire["Fire Ops"]
+    evac["Evac and Traffic"]
+    health["Public Health"]
+    planner["Planner merges proposals"]
+    rules["rules.py decides"]
+    drafts["Public Info<br/>EN and ES drafts"]
+    fire --> planner
+    evac --> planner
+    health --> planner
+    planner --> rules --> drafts
+  end
+
+  decide --> pending["PENDING_APPROVAL<br/>nothing is public yet"]
+
+  pending --> gate{"Duty officer"}
+  gate -->|Reject| rejected["No message sent"]
+  gate -->|Edit| pending
+  gate -->|Approve| send
+
+  subgraph send ["Notify"]
+    direction LR
+    email["Email · SES"]
+    sms["SMS · simulator"]
+    web["Web zone page"]
+    alexa["Alexa stub · Polly"]
+  end
+
+  send --> wait["Wait for acknowledgement"]
+  wait --> acks{"Vulnerable and<br/>still unacknowledged?"}
+  acks -->|No| report["Report"]
+  acks -->|Yes| care["Email caregiver<br/>flag the dashboard"]
+  care --> report
+
+  routes -->|"new evidence: route blocked or new gap"| cycle["New cycle<br/>previous draft SUPERSEDED"]
+  cycle --> decide

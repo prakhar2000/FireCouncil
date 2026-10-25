@@ -1,0 +1,53 @@
+%% Horizontal flow. us-east-2.
+%% A smoke mark starts one COOL Graviton check. That start runs only when GRAVITON_LAUNCH=1.
+%% Approve publishes WarningApproved on EventBridge when APPROVAL_EVENTS=1.
+%% The message is for older and disabled residents. The demo records it. It is not emailed.
+flowchart LR
+  subgraph zones ["Watch zones"]
+    direction TB
+    z1["Zone 1<br/>cameras"]
+    z2["Zone 2<br/>cameras"]
+    z3["Zone 3<br/>cameras"]
+  end
+
+  subgraph watch ["Amazon EC2 · always on"]
+    direction TB
+    see["t4g.small<br/>OpenCV 5, pip"]
+    gate{"Smoke in<br/>a zone?"}
+  end
+
+  subgraph burst ["Amazon EC2 · COOL Graviton<br/>starts for that zone, then stops"]
+    direction TB
+    cool["c8g.2xlarge<br/>OpenCV from /opt/cool"]
+    speed["Speed of the fire"]
+  end
+
+  subgraph bedrock ["Amazon Bedrock"]
+    direction LR
+    fire["Fire department<br/>persona"]
+    evac["Evacuation and traffic<br/>persona"]
+    health["Public health<br/>persona"]
+  end
+
+  rules["Warn if ETA ≤ 120 min. Urgent if ≤ 60. Road clear or slow, last 10 min"]
+  officer["Duty officer<br/>approves"]
+  bridge["Amazon EventBridge<br/>WarningApproved"]
+  residents["Older and disabled<br/>residents"]
+  quiet["Graviton stays stopped"]
+
+  z1 --> see
+  z2 --> see
+  z3 --> see
+  see --> gate
+  gate -->|No| quiet
+  gate -->|Yes| cool
+  cool --> speed
+  speed --> fire
+  speed --> evac
+  speed --> health
+  fire --> rules
+  evac --> rules
+  health --> rules
+  rules --> officer
+  officer --> bridge
+  bridge --> residents

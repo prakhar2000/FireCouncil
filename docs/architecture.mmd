@@ -1,0 +1,85 @@
+%% FireCouncil AWS architecture. Current runs use stock OpenCV 5 on the laptop.
+%% The COOL box below is the later Graviton switch, not tonight's host.
+%% Account region is us-east-2.
+%% c7i.2xlarge (stock OpenCV 5) is a short-lived benchmark host, not on this path.
+flowchart TB
+  subgraph sources ["Public sources"]
+    direction LR
+    firms["NASA FIRMS"]
+    cams["HPWREN · ALERTCalifornia · Caltrans"]
+    ctx["FIRIS perimeters · NWS wind"]
+    goes["GOES-18 S3<br/>noaa-goes18"]
+    sns["NOAA SNS<br/>NewGOES18Object"]
+  end
+
+  subgraph ingest ["Ingest"]
+    direction LR
+    sched["EventBridge Scheduler"]
+    poll["Lambda pollers"]
+    sqs["SQS goes-queue"]
+    replay["replay_feeder"]
+    raw["S3 raw/"]
+  end
+
+  subgraph compute ["EC2 c8g.2xlarge · COOL AMI · OpenCV 5"]
+    direction LR
+    vision["vision-svc<br/>smoke · GOES track · routes"]
+    agents["agents-svc<br/>Strands personas"]
+    bedrock["Amazon Bedrock"]
+  end
+
+  subgraph state ["State"]
+    direction LR
+    ddb["DynamoDB fc_*"]
+    evidence["S3 evidence · traces"]
+  end
+
+  subgraph human ["Human gate"]
+    direction LR
+    api["API Gateway · Lambda"]
+    dash["Dashboard<br/>S3 · CloudFront · Cognito"]
+  end
+
+  subgraph notify ["Notify · after APPROVED only"]
+    direction LR
+    sfn["Step Functions<br/>Notify · Wait · CheckAcks · Escalate · Report"]
+    ses["SES email"]
+    sms["SMS simulator"]
+    page["Zone page<br/>CloudFront"]
+    polly["Polly MP3<br/>Alexa stub"]
+  end
+
+  ssm["SSM<br/>FIRMS key · kill switch"]
+  cw["CloudWatch"]
+
+  firms --> poll
+  cams --> poll
+  ctx --> poll
+  sched --> poll
+  goes --> sns --> sqs
+  poll --> raw
+  sqs --> raw
+  replay --> raw
+
+  raw --> vision
+  vision --> agents
+  agents --> bedrock
+  vision --> evidence
+  agents --> ddb
+  agents --> evidence
+
+  ddb --> api
+  evidence --> api
+  api <--> dash
+  api -->|"APPROVED"| sfn
+
+  sfn --> ses
+  sfn --> sms
+  sfn --> page
+  sfn --> polly
+  sfn --> ddb
+
+  ssm -.->|"blocks send"| sfn
+  ssm -.-> poll
+  vision -.-> cw
+  agents -.-> cw

@@ -1,0 +1,22 @@
+%% High-level architecture. Same loop as mvp_flow, named by job.
+%% AWS product names stay in the README glossary and in architecture.mmd.
+flowchart TD
+  watch["1 · Watch<br/>Cameras, a weather satellite, and fire maps<br/>A timer saves new pictures. Replays use the same inbox."]
+  look["2 · Look<br/>OpenCV checks smoke, which way the fire is moving,<br/>and whether the road is blocked<br/>(stock OpenCV 5 on the laptop; COOL later)"]
+  draft["3 · Draft<br/>Three specialists propose. Fixed rules decide.<br/>The warning waits. It is not public yet.<br/>(language models propose, our code decides)"]
+  person{"4 · A person approves<br/>Approve, edit, or reject on a website"}
+  tell["5 · Tell people<br/>Email, text, a web page, and a voice recording<br/>Then wait to see who replies"]
+  check{"A vulnerable person<br/>did not reply?"}
+  care["Tell their caregiver<br/>and flag it on the website"]
+  done["Done"]
+  rejected["Nothing is sent"]
+  stop["Off switch<br/>can block every send"]
+
+  watch --> look --> draft --> person
+  person -->|Approve| tell
+  person -->|Edit| draft
+  person -->|Reject| rejected
+  tell --> check
+  check -->|Yes| care --> done
+  check -->|No| done
+  stop -.->|"stops step 5"| tell

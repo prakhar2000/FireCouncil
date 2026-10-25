@@ -1,0 +1,13 @@
+COOL Graviton4 check, 2026-10-24.
+
+instance i-035fbd935cc75a88c
+type c8g.2xlarge
+ami ami-0f7cc6a2059ad561f (COOL-Graviton4-v2-AMI-prod-k6u24vxijyzvg)
+region us-east-2
+arch aarch64
+
+source /opt/cool/venvs/python_3.12/bin/activate
+cv2.__version__ 4.14.0-pre
+cv2.__file__ /opt/cool/python_3.12/site-packages/cv2/python-3.12/cv2.cpython-312-aarch64-linux-gnu.so
+
+A 24x24 frame was resized to 8x8 with this build. The instance was stopped after the check.

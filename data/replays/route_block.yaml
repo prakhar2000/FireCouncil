@@ -1,0 +1,80 @@
+name: route_block
+incident_id: norte-replay
+label: DEMO ZONES — not official
+spread_bearing_deg: 45
+spread_kmh: 3.0
+smoke_confirmed: true
+focus_lat: 33.5017
+focus_lon: -117.6628
+firms_csvs:
+  - data/fixtures/firms/2026-10-16-viirs-noaa20.csv
+  - data/fixtures/firms/2026-10-16-modis.csv
+zones:
+  capistrano:
+    name: Capistrano
+    eta_min: 45
+    official_status: none
+    status_source: manual
+  san_clemente:
+    name: San Clemente
+    eta_min: 180
+    official_status: advisory
+    status_source: manual
+care_sites:
+  - id: care-1
+    zone_id: capistrano
+    name: Demo Care
+residents:
+  - resident_id: r-vulnerable
+    zone_id: capistrano
+    vulnerable: true
+    language: en
+    caregiver_email: caregiver@example.com
+  - resident_id: r-ok
+    zone_id: san_clemente
+    vulnerable: false
+    language: en
+    caregiver_email: ""
+cycles:
+  - ts: "2026-10-16T19:00:00Z"
+    routes:
+      sr74:
+        status: clear
+        age_s: 60
+        evidence_id: ev-sr74-1
+        vehicles: 4
+        stalled_ratio: 0.05
+        haze_score: 0.1
+        frames:
+          - tests/fixtures/routes/clear/f0.png
+          - tests/fixtures/routes/clear/f1.png
+          - tests/fixtures/routes/clear/f2.png
+          - tests/fixtures/routes/clear/f3.png
+      i5:
+        status: slow
+        age_s: 60
+        evidence_id: ev-i5-1
+        vehicles: 12
+        stalled_ratio: 0.3
+        haze_score: 0.2
+  - ts: "2026-10-16T19:10:00Z"
+    routes:
+      sr74:
+        status: blocked
+        age_s: 30
+        evidence_id: ev-sr74-2
+        vehicles: 8
+        stalled_ratio: 0.8
+        haze_score: 0.3
+        frames:
+          - tests/fixtures/routes/blocked/f0.png
+          - tests/fixtures/routes/blocked/f1.png
+          - tests/fixtures/routes/blocked/f2.png
+          - tests/fixtures/routes/blocked/f3.png
+      i5:
+        status: slow
+        age_s: 30
+        evidence_id: ev-i5-2
+        vehicles: 10
+        stalled_ratio: 0.25
+        haze_score: 0.2

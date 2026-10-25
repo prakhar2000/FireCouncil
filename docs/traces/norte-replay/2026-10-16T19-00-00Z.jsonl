@@ -1,0 +1,5 @@
+{"type": "tool", "name": "fire_ops", "args": {"incident_id": "norte-replay", "cycle_ts": "2026-10-16T19:00:00Z"}, "latency_ms": 0.558, "evidence_id": "ev-sr74-1", "runtime": {"cv2_version": "5.0.0", "cv2_path": "/Users/prakhargoel/FireCouncil/.venv/lib/python3.15/site-packages/cv2/__init__.py", "host_arch": "arm64"}}
+{"type": "tool", "name": "evac_traffic", "args": {"incident_id": "norte-replay", "cycle_ts": "2026-10-16T19:00:00Z"}, "latency_ms": 2.521, "evidence_id": null, "runtime": {"cv2_version": "5.0.0", "cv2_path": "/Users/prakhargoel/FireCouncil/.venv/lib/python3.15/site-packages/cv2/__init__.py", "host_arch": "arm64"}}
+{"type": "tool", "name": "public_health", "args": {"incident_id": "norte-replay", "cycle_ts": "2026-10-16T19:00:00Z"}, "latency_ms": 0.007, "evidence_id": null, "runtime": {"cv2_version": "5.0.0", "cv2_path": "/Users/prakhargoel/FireCouncil/.venv/lib/python3.15/site-packages/cv2/__init__.py", "host_arch": "arm64"}}
+{"type": "planner", "route": "sr74"}
+{"type": "rules", "rule_hits": ["R2", "R1", "R3", "R4", "R6"], "route": "sr74"}
