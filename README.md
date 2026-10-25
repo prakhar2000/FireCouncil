@@ -30,6 +30,24 @@ Zones on the page are **demo zones, not official.** Camera frames are from HPWRE
 
 `KILL_SWITCH=true` stops the outbox write.
 
+## COOL compared with ordinary OpenCV
+
+Same check the page runs, on the three Fairview cameras, eight frames each. Median of three passes after a warmup. Smoke is marked on the same frame on every machine. COOL does not see the fire earlier. The difference is computer time.
+
+| Machine | OpenCV | vCPU | Time for 3 cameras | 1,000 cameras, one after another |
+|---|---|---|---|---|
+| Demo EC2, `t4g.small` | pip 5.0.0 | 2 | 1.069 s | 356 s |
+| Same size as COOL, `c8g.2xlarge` | pip 5.0.0 | 8 | 0.512 s | 171 s |
+| COOL image, `c8g.2xlarge` | 4.14.0-pre from `/opt/cool` | 8 | 0.482 s | 161 s |
+
+First mark in the footage, identical on all three:
+
+- Boucher Hill: 60 seconds into the clip, frame 2
+- Santa Margarita: 121 seconds, frame 3
+- Toro Peak: 122 seconds, frame 3
+
+On the same `c8g.2xlarge`, COOL finishes these three cameras 0.03 seconds sooner than ordinary OpenCV. Across 1,000 cameras done one after another, that gap is about 10 seconds of computer time. Against the small demo box the gap is about 3 minutes, and most of that is the bigger machine. This timing does not add alerts or a count of people reached.
+
 ## Architecture
 
 ![FireCouncil architecture](docs/architecture.jpg)
